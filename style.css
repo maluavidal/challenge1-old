@@ -1,0 +1,48 @@
+.clear {
+    text-decoration: line-through;
+}
+
+#img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50px;
+    margin-right: 10px;
+}
+
+.form-control {
+    width: 160px;
+    margin-left: 30px;
+}
+
+#search-div {
+    display: flex;
+}
+
+#footer{
+    text-align: center;
+    font-size: 18px;
+}
+
+.riscado {
+    text-decoration: line-through;
+}
+
+p {
+    padding:  6px 0 0 12px;
+}
+
+div {
+    padding-bottom: 15px;
+}
+
+body {
+    padding: 100px;
+}
+
+
+td {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
