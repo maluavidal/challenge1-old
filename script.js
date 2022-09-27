@@ -124,12 +124,12 @@ const renderTable = (guides) => {
     }
 
     guides.forEach(guide => {
-        let riscado = '';
-        let hover = '';
+        let deleted = '';
+        let hoverdeleted = '';
 
         if(guide.health_insurance.is_deleted) {
-            riscado = 'riscado';
-            hover = 'Convênio Apagado';
+            deleted = 'deleted';
+            hoverdeleted = 'Convênio Apagado';
         };
 
         html += `
@@ -137,7 +137,7 @@ const renderTable = (guides) => {
             <td>${new Date(guide.start_date).toLocaleDateString('pt-BR')}</td>
             <td>${guide.number}</td>
             <td><img id="img" src="${guide.patient.thumb_url || "https://via.placeholder.com/150x150.jpg"}"/>${guide.patient.name}</td>
-            <td class="${riscado}" title="${hover}">${guide.health_insurance.name}</td>
+            <td class="${deleted}" title="${hoverdeleted}">${guide.health_insurance.name}</td>
             <td>${guide.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL'})}</td>
         </tr>
         `
@@ -159,14 +159,14 @@ const renderSelect = (insurances) => {
 }
 
 renderSelect(insurances);
-
+                            // return
+const normalizeValue = value => {
+    return value.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 
 const filterTable = () => {
     const selectValue = ~~document.getElementById('sel').value;
-    const inputValue = search.value;
-    inputValue.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    
-    console.log(inputValue);
+    const inputValue = normalizeValue(search.value);
     
     if(!selectValue && !inputValue) {
         return renderTable(guides);
@@ -174,19 +174,20 @@ const filterTable = () => {
     
     const filteredInsurances = guides.filter(element => {
         let isValid = true;
-        const patientName = element.patient.name.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const patientName = normalizeValue(element.patient.name);
+        const number = element.number;
 
-        if(!patientName.includes(inputValue)) {
+        if(!patientName.includes(inputValue) && !number.includes(inputValue)) {
             isValid = false;
         }
 
         if(!(element.health_insurance.id === selectValue || selectValue === 0)) {
             isValid = false;
         }
-
+        
         return isValid;
     })    
-
+    
     renderTable(filteredInsurances);
 }
 
