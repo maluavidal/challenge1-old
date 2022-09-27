@@ -115,8 +115,6 @@ const search = document.getElementById('search');
 const renderTable = (guides) => {
     let html = '';
 
-    console.log(guides);
-
     if(guides.length === 0) {
         html += `
         <tr>
