@@ -1,0 +1,68 @@
+.clear {
+    text-decoration: line-through;
+}
+
+#img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50px;
+    margin-right: 10px;
+}
+
+.form-control {
+    width: 160px;
+    margin-left: 30px;
+    border-radius: 0px;
+    color: #212529;
+}
+
+#search-div {
+    display: flex;
+}
+
+#footer{
+    text-align: center;
+    font-size: 18px;
+}
+
+.deleted {
+    text-decoration: line-through;
+}
+
+p {
+    padding:  6px 0 0 12px;
+}
+
+div {
+    padding-bottom: 15px;
+}
+
+body {
+    padding: 100px;
+}
+
+
+td {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.el-height {
+    height: 38px;
+    border: solid lightgrey 1px;
+    background-color: white;
+    padding: 0 15px 0 15px;
+}
+
+.spacing {
+    margin-left: 30px;
+
+}
+
+#month:hover, #today:hover {
+    background-color: rgb(30, 154, 230);
+    color: white;
+    border: solid 1px darkblue;
+}
