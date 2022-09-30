@@ -66,3 +66,7 @@ td {
     color: white;
     border: solid 1px darkblue;
 }
+
+.page-link { 
+    color: black;
+}

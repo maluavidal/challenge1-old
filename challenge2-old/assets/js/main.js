@@ -17,7 +17,7 @@ const data = {
     }],
     "guides": [{
         "number": "3210998321",
-        "start_date": "2021-04-23T19:18:47.210Z",
+        "start_date": "2022-04-23T19:18:47.210Z",
         "patient": {
             "id": 9321123,
             "name": "Augusto Ferreira",
@@ -32,7 +32,7 @@ const data = {
         "price": 5567.2
     }, {
         "number": "287312832",
-        "start_date": "2021-04-23T19:18:47.210Z",
+        "start_date": "2022-04-23T19:18:47.210Z",
         "patient": {
             "id": 93229123,
             "name": "Caio Carneiro",
@@ -47,7 +47,7 @@ const data = {
         "price": 213.3
     }, {
         "number": "283718273",
-        "start_date": "2021-04-22T19:18:47.210Z",
+        "start_date": "2022-04-22T19:18:47.210Z",
         "patient": {
             "id": 213122388,
             "name": "Luciano José",
@@ -62,7 +62,7 @@ const data = {
         "price": 88.99
     }, {
         "number": "009090321938",
-        "start_date": "2021-04-20T19:18:47.210Z",
+        "start_date": "2022-04-20T19:18:47.210Z",
         "patient": {
             "id": 3367263,
             "name": "Felício Santos",
@@ -77,7 +77,7 @@ const data = {
         "price": 828.99
     }, {
         "number": "8787128731",
-        "start_date": "2021-04-01T19:18:47.210Z",
+        "start_date": "2022-04-01T19:18:47.210Z",
         "patient": {
             "id": 777882,
             "name": "Fernando Raposo"
@@ -91,7 +91,7 @@ const data = {
         "price": 772
     }, {
         "number": "12929321",
-        "start_date": "2021-04-02T19:18:47.210Z",
+        "start_date": "2022-04-02T19:18:47.210Z",
         "patient": {
             "id": 221,
             "name": "Paciente com nome grante pra colocar text ellipsis testando nome com paciente grande"
@@ -164,23 +164,23 @@ const formatDate = (date) => {
     return new Date(date).toISOString().slice(0,10);
 }
 
-let monthStartInput = document.getElementById('month-start');
-let monthEndInput = document.getElementById('month-end');
+const dateStartInput = document.getElementById('month-start');
+const dateEndInput = document.getElementById('month-end');
 
 const changeDateFilter = (type) => {
 
     if (type === 'month') {
         const rawDate = new Date();
         const firstDay = new Date(rawDate.getFullYear(), rawDate.getMonth(), 1);
-        monthStartInput.value = `${formatDate(firstDay)}`;
+        dateStartInput.value = `${formatDate(firstDay)}`;
     
         const lastDay = new Date(rawDate.getFullYear(), rawDate.getMonth() + 1, 0);
-        monthEndInput.value = `${formatDate(lastDay)}`;
+        dateEndInput.value = `${formatDate(lastDay)}`;
     }
 
     if (type === 'today') {
-        monthStartInput.value = `${formatDate(new Date())}`;
-        monthEndInput.value = `${formatDate(new Date())}`;
+        dateStartInput.value = `${formatDate(new Date())}`;
+        dateEndInput.value = `${formatDate(new Date())}`;
     }
 }
 
@@ -189,11 +189,12 @@ const normalizeValue = value => {
 }
 
 const filterTable = () => {
-    changeDateFilter('month');
     const selectValue = ~~document.getElementById('sel').value;
     const searchInputValue = normalizeValue(search.value);
-   
-    if(!selectValue && !searchInputValue) {
+    const dateStartInputValue = document.getElementById('month-start').value;
+    const dateEndInputValue = document.getElementById('month-end').value;
+    
+    if(!selectValue && !searchInputValue && !dateStartInputValue && !dateEndInputValue) {
         return renderTable(guides);
     }
     
@@ -203,26 +204,78 @@ const filterTable = () => {
         const number = element.number;
         const startDate = formatDate(element.start_date);
 
-        console.log(startDate);
-
-        if(!patientName.includes(searchInputValue) && !number.includes(searchInputValue) || !startDate.includes(monthStartInput)) {
+        if(!patientName.includes(searchInputValue) && !number.includes(searchInputValue)) {
             isValid = false;
         }
 
         if(!(element.health_insurance.id === selectValue || selectValue === 0)) {
             isValid = false;
         }
-        
-        // if(startDate === monthStartInput.value)) {
-        //     isValid = false;
-        // }
-    
+
+        if(dateStartInputValue > dateEndInputValue) {
+            return
+        }
+
+        if(!(startDate > dateStartInputValue && startDate < dateEndInputValue)) {
+            isValid = false;
+        }
 
         return isValid;
-    })    
-    
+    }) 
+
+// let ordered = false;
+
+const renderOrderedTable = guides.sort((date, nextDate) => {
+    if(formatDate(date.start_date) > formatDate(nextDate.start_date)) {
+        return 1;
+    }
+
+    if(formatDate(date.start_date) < formatDate(nextDate.start_date)) {
+        return -1;
+    }
+
+    return 0;
+});
+
+// const orderDates = () => {
+//     const orderIcon = document.getElementById('order-icon');
+
+//     if(!ordered){
+//         orderIcon.classList.remove('fa-solid fa-sort-up');
+//         orderIcon.classList.add('fa-solid fa-sort-down');
+//         ordered = true;
+//         renderOrderedTable(guides.start_date);
+//         return;
+//     }
+
+//     if(ordered){
+//         orderIcon.classList.remove('fa-solid fa-sort-down');
+//         orderIcon.classList.add('fa-solid fa-sort-up');
+//         ordered = false;
+//         renderOrderedTable(guides.start_date);
+//         return;
+//     }
+//     orderDates();
+// }
+
     renderTable(filteredGuides);
 }
 
+
+const pagination = (totalItems, itemsPerPage) => {
+    const pages = document.getElementById('pages');
+    console.log(pages);
+    const totalPages = totalItems / itemsPerPage;
+
+
+    for (let i = 0; i < totalPages; i++) {
+        pages.innerHTML += `<li class="page-item"><a class="page-link" href="#">ggg</a><button></button><li>`
+    }
+
+}
+
+changeDateFilter('month');
 filterTable();
+
+pagination();
 
