@@ -115,10 +115,10 @@ const search = document.getElementById('search');
 const renderTable = (guides) => {
     let html = '';
 
-    if(guides.length === 0) {
+    if (guides.length === 0) {
         html += `
         <tr>
-            <td colspan="5" id="footer">Nenhuma guia encontrada</td>
+        <td colspan="5" id="footer">Nenhuma guia encontrada</td>
         </tr>
         `
     }
@@ -127,7 +127,7 @@ const renderTable = (guides) => {
         let deleted = '';
         let hoverDeleted = '';
 
-        if(guide.health_insurance.is_deleted) {
+        if (guide.health_insurance.is_deleted) {
             deleted = 'deleted';
             hoverDeleted = 'Convênio Apagado';
         };
@@ -138,7 +138,7 @@ const renderTable = (guides) => {
             <td>${guide.number}</td>
             <td><img id="img" src="${guide.patient.thumb_url || "https://via.placeholder.com/150x150.jpg"}"/>${guide.patient.name}</td>
             <td class="${deleted}" title="${hoverDeleted}">${guide.health_insurance.name}</td>
-            <td>${guide.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL'})}</td>
+            <td>${guide.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
         </tr>
         `
     });
@@ -150,7 +150,7 @@ renderTable(guides)
 
 const renderSelect = (insurances) => {
     let html = `<option value="">Convênio</option>`;
-    
+
     insurances.forEach(insurance => {
         html += `<option value="${insurance.id}">${insurance.name}</option>`
     });
@@ -161,7 +161,7 @@ const renderSelect = (insurances) => {
 renderSelect(insurances);
 
 const formatDate = (date) => {
-    return new Date(date).toISOString().slice(0,10);
+    return new Date(date).toISOString().slice(0, 10);
 }
 
 const dateStartInput = document.getElementById('month-start');
@@ -173,7 +173,7 @@ const changeDateFilter = (type) => {
         const rawDate = new Date();
         const firstDay = new Date(rawDate.getFullYear(), rawDate.getMonth(), 1);
         dateStartInput.value = `${formatDate(firstDay)}`;
-    
+
         const lastDay = new Date(rawDate.getFullYear(), rawDate.getMonth() + 1, 0);
         dateEndInput.value = `${formatDate(lastDay)}`;
     }
@@ -193,89 +193,122 @@ const filterTable = () => {
     const searchInputValue = normalizeValue(search.value);
     const dateStartInputValue = document.getElementById('month-start').value;
     const dateEndInputValue = document.getElementById('month-end').value;
-    
-    if(!selectValue && !searchInputValue && !dateStartInputValue && !dateEndInputValue) {
+
+    if (!selectValue && !searchInputValue && !dateStartInputValue && !dateEndInputValue) {
         return renderTable(guides);
     }
-    
+
     const filteredGuides = guides.filter(element => {
         let isValid = true;
         const patientName = normalizeValue(element.patient.name);
         const number = element.number;
         const startDate = formatDate(element.start_date);
 
-        if(!patientName.includes(searchInputValue) && !number.includes(searchInputValue)) {
+        if (!patientName.includes(searchInputValue) && !number.includes(searchInputValue)) {
             isValid = false;
         }
 
-        if(!(element.health_insurance.id === selectValue || selectValue === 0)) {
+        if (!(element.health_insurance.id === selectValue || selectValue === 0)) {
             isValid = false;
         }
 
-        if(dateStartInputValue > dateEndInputValue) {
+        if (dateStartInputValue > dateEndInputValue) {
             return
         }
 
-        if(!(startDate > dateStartInputValue && startDate < dateEndInputValue)) {
+        if (!(startDate > dateStartInputValue && startDate < dateEndInputValue)) {
             isValid = false;
         }
 
         return isValid;
-    }) 
+    })
 
-// let ordered = false;
+    filteredGuides.sort((date, nextDate) => {
+        if (formatDate(date.start_date) > formatDate(nextDate.start_date)) {
+            return 1;
+        }
+        
+        if (formatDate(date.start_date) < formatDate(nextDate.start_date)) {
+            return -1;
+        }
+        
+        return 0;
 
-const renderOrderedTable = guides.sort((date, nextDate) => {
-    if(formatDate(date.start_date) > formatDate(nextDate.start_date)) {
-        return 1;
-    }
 
-    if(formatDate(date.start_date) < formatDate(nextDate.start_date)) {
-        return -1;
-    }
+    });
 
-    return 0;
-});
+    // let ordered = false;
 
-// const orderDates = () => {
-//     const orderIcon = document.getElementById('order-icon');
+    // console.log(renderOrderedTable);
 
-//     if(!ordered){
-//         orderIcon.classList.remove('fa-solid fa-sort-up');
-//         orderIcon.classList.add('fa-solid fa-sort-down');
-//         ordered = true;
-//         renderOrderedTable(guides.start_date);
-//         return;
-//     }
+    // const orderDates = () => {
+    //     const orderIcon = document.getElementById('order-icon');
 
-//     if(ordered){
-//         orderIcon.classList.remove('fa-solid fa-sort-down');
-//         orderIcon.classList.add('fa-solid fa-sort-up');
-//         ordered = false;
-//         renderOrderedTable(guides.start_date);
-//         return;
-//     }
-//     orderDates();
-// }
+    //     if(!ordered){
+    //         orderIcon.classList.remove('fa-solid fa-sort-up');
+    //         orderIcon.classList.add('fa-solid fa-sort-down');
+    //         ordered = true;
+    //         renderOrderedTable(guides.start_date);
+    //         return;
+    //     }
+
+    //     if(ordered){
+    //         orderIcon.classList.remove('fa-solid fa-sort-down');
+    //         orderIcon.classList.add('fa-solid fa-sort-up');
+    //         ordered = false;
+    //         renderOrderedTable(guides.start_date);
+    //         return;
+    //     }
+    //     orderDates();
+    // }
 
     renderTable(filteredGuides);
 }
 
+let currentPage = 1;
+let itemsPerPage = 2;
 
-const pagination = (totalItems, itemsPerPage) => {
+function paginate(id) {
+    currentPage = id;
+
+    const totalPages = Math.ceil(guides.length / itemsPerPage)
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    const paginatedGuides = guides.slice(offset).slice(0, itemsPerPage);
+
+    renderTable(paginatedGuides);
+}
+
+const paginationStructure = (totalItems, itemsPerPage) => {
     const pages = document.getElementById('pages');
-    console.log(pages);
-    const totalPages = totalItems / itemsPerPage;
+    const totalPages = Math.ceil(totalItems / itemsPerPage)
+    const offset = (currentPage - 1) * itemsPerPage;
 
+    const paginatedGuides = guides.slice(offset).slice(0, itemsPerPage);
+    console.log(paginatedGuides);
 
-    for (let i = 0; i < totalPages; i++) {
-        pages.innerHTML += `<li class="page-item"><a class="page-link" href="#">ggg</a><button></button><li>`
+    pages.innerHTML += `
+        <li class="page-item"><a class="page-link" href="#" onClick="paginate(1)">Primeira</a><li>
+        <li class="page-item"><a class="page-link" href="#" onClick="paginate(id - 1)">Anterior</a><li>
+        `
+
+    for (let i = 1; i <= totalPages; i++) {
+        pages.innerHTML += `
+        <li class="page-item"><a class="page-link" id="${i}" href="#" onClick="paginate(id)">${i}</a><li>
+        `
     }
+
+    pages.innerHTML += `
+        <li class="page-item"><a class="page-link" href="#" onClick="paginate(id + 1)" >Próxima</a><li>
+        <li class="page-item"><a class="page-link" href="#">Última</a><li>
+
+        `
+        renderTable(paginatedGuides);
 
 }
 
 changeDateFilter('month');
 filterTable();
 
-pagination();
+paginationStructure(guides.length, 2);
 

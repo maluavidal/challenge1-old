@@ -1,7 +1,3 @@
-.clear {
-    text-decoration: line-through;
-}
-
 #img {
     width: 35px;
     height: 35px;
@@ -58,10 +54,9 @@ td {
 
 .spacing {
     margin-left: 30px;
-
 }
 
-#month:hover, #today:hover {
+#month:hover, #today:hover{
     background-color: rgb(30, 154, 230);
     color: white;
     border: solid 1px darkblue;
@@ -70,3 +65,17 @@ td {
 .page-link { 
     color: black;
 }
+
+.li {
+    display: flex;
+    list-style: none;
+    justify-content: center;
+    margin: 0;
+    border-radius: 0;
+    padding: 0;
+}
+
+nav {
+    padding:0;
+}
+
