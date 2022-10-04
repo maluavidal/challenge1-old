@@ -188,22 +188,76 @@ const normalizeValue = value => {
     return value.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-const filterTable = () => {
+let currentPage = 1;
+let itemsPerPage = 2;
+
+const paginate = (page = 1, filtered) => {
+    // console.log(page)
+    currentPage = page;
+
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    const paginatedGuides = filtered.slice(offset).slice(0, itemsPerPage);
+    console.log(paginatedGuides)
+    renderTable(paginatedGuides);
+}
+
+const paginationStructure = (guides, itemsPerPage) => {
+    const pages = document.getElementById('pages');
+    const totalPages = Math.ceil(guides.length / itemsPerPage)
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    console.log(currentPage);
+
+    const paginatedGuides = guides.slice(offset).slice(0, itemsPerPage);
+    console.log(paginatedGuides);
+
+    if (!filteredGuides.length) return;
+
+    pages.innerHTML += `
+        <li class="page-item"><a class="page-link" href="#" onClick="filterTable(1)">Primeira</a><li>
+        <li class="page-item"><a class="page-link" href="#" onClick="filterTable(currentPage - 1)">Anterior</a><li>
+        `
+
+    for (let i = 1; i <= totalPages; i++) {
+        pages.innerHTML += `
+        <li class="page-item"><a class="page-link" currentPage="${i}" href="#" onClick="filterTable(${i})">${i}</a><li>
+        `
+    }
+
+    pages.innerHTML += `
+        <li class="page-item"><a class="page-link" href="#" onClick="filterTable(currentPage + 1)" >Próxima</a><li>
+        <li class="page-item"><a class="page-link" href="#" onClick="filterTable(${currentPage}, true)">Última</a><li>
+
+        `
+}
+let filteredGuides;
+
+const filterTable = (currentPage, lastPage = false) => {
     const selectValue = ~~document.getElementById('sel').value;
     const searchInputValue = normalizeValue(search.value);
     const dateStartInputValue = document.getElementById('month-start').value;
     const dateEndInputValue = document.getElementById('month-end').value;
 
-    if (!selectValue && !searchInputValue && !dateStartInputValue && !dateEndInputValue) {
-        return renderTable(guides);
+    if (currentPage < 1) {
+        currentPage = 1;
     }
 
-    const filteredGuides = guides.filter(element => {
+    if (currentPage >= guides.length - 1) {
+        return currentPage = currentPage - 1;
+    }
+
+    if (!selectValue && !searchInputValue && !dateStartInputValue && !dateEndInputValue) {
+        return;
+    }
+    
+    filteredGuides = guides.filter(element => {
         let isValid = true;
         const patientName = normalizeValue(element.patient.name);
         const number = element.number;
         const startDate = formatDate(element.start_date);
-
+        
         if (!patientName.includes(searchInputValue) && !number.includes(searchInputValue)) {
             isValid = false;
         }
@@ -213,7 +267,7 @@ const filterTable = () => {
         }
 
         if (dateStartInputValue > dateEndInputValue) {
-            return
+            isValid = false;
         }
 
         if (!(startDate > dateStartInputValue && startDate < dateEndInputValue)) {
@@ -227,14 +281,12 @@ const filterTable = () => {
         if (formatDate(date.start_date) > formatDate(nextDate.start_date)) {
             return 1;
         }
-        
+
         if (formatDate(date.start_date) < formatDate(nextDate.start_date)) {
             return -1;
         }
-        
+
         return 0;
-
-
     });
 
     // let ordered = false;
@@ -262,53 +314,16 @@ const filterTable = () => {
     //     orderDates();
     // }
 
-    renderTable(filteredGuides);
-}
-
-let currentPage = 1;
-let itemsPerPage = 2;
-
-function paginate(id) {
-    currentPage = id;
-
-    const totalPages = Math.ceil(guides.length / itemsPerPage)
-    const offset = (currentPage - 1) * itemsPerPage;
-
-    const paginatedGuides = guides.slice(offset).slice(0, itemsPerPage);
-
-    renderTable(paginatedGuides);
-}
-
-const paginationStructure = (totalItems, itemsPerPage) => {
-    const pages = document.getElementById('pages');
-    const totalPages = Math.ceil(totalItems / itemsPerPage)
-    const offset = (currentPage - 1) * itemsPerPage;
-
-    const paginatedGuides = guides.slice(offset).slice(0, itemsPerPage);
-    console.log(paginatedGuides);
-
-    pages.innerHTML += `
-        <li class="page-item"><a class="page-link" href="#" onClick="paginate(1)">Primeira</a><li>
-        <li class="page-item"><a class="page-link" href="#" onClick="paginate(id - 1)">Anterior</a><li>
-        `
-
-    for (let i = 1; i <= totalPages; i++) {
-        pages.innerHTML += `
-        <li class="page-item"><a class="page-link" id="${i}" href="#" onClick="paginate(id)">${i}</a><li>
-        `
+    if(lastPage) {
+        currentPage = filteredGuides.length / 2; 
     }
 
-    pages.innerHTML += `
-        <li class="page-item"><a class="page-link" href="#" onClick="paginate(id + 1)" >Próxima</a><li>
-        <li class="page-item"><a class="page-link" href="#">Última</a><li>
-
-        `
-        renderTable(paginatedGuides);
-
+    // console.log(currentPage)
+    paginate(currentPage, filteredGuides);
 }
 
 changeDateFilter('month');
 filterTable();
 
-paginationStructure(guides.length, 2);
 
+paginationStructure(guides, 2);
