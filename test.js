@@ -108,16 +108,27 @@ const data = {
 
 const { insurances, guides } = data;
 
-const formatDate = (date) => {
-    return new Date(date).toISOString().slice(0,10);
-}
+ // let ordered = false;
 
-const x = guides.sort((x, y) => {
-    if(formatDate(x.start_date) > formatDate(y.start_date)) return 1;
-        
-    if(formatDate(x.start_date) < formatDate(y.start_date)) return -1;
+    // console.log(renderOrderedTable);
 
-    return 0;
-});
+    // const orderDates = () => {
+    //     const orderIcon = document.getElementById('order-icon');
 
-console.log(x);
+    //     if(!ordered){
+    //         orderIcon.classList.remove('fa-solid fa-sort-up');
+    //         orderIcon.classList.add('fa-solid fa-sort-down');
+    //         ordered = true;
+    //         renderOrderedTable(guides.start_date);
+    //         return;
+    //     }
+
+    //     if(ordered){
+    //         orderIcon.classList.remove('fa-solid fa-sort-down');
+    //         orderIcon.classList.add('fa-solid fa-sort-up');
+    //         ordered = false;
+    //         renderOrderedTable(guides.start_date);
+    //         return;
+    //     }
+    //     orderDates();
+    // }

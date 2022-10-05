@@ -17,11 +17,11 @@ const data = {
     }],
     "guides": [{
         "number": "3210998321",
-        "start_date": "2022-04-23T19:18:47.210Z",
+        "start_date": "2022-09-23T19:18:47.210Z",
         "patient": {
             "id": 9321123,
             "name": "Augusto Ferreira",
-            "thumb_url": "https://imgsapp2.correiobraziliense.com.br/app/noticia_127983242361/2019/10/04/794834/20191004154953157610i.jpg"
+            "thumb_url": "https://imgsapp2.correiobraziliense.com.br/app/noticia_127983242361/2019/10/09/794834/20191004154953157610i.jpg"
         },
         "insurane_id": 1322,
         "health_insurance": {
@@ -32,7 +32,7 @@ const data = {
         "price": 5567.2
     }, {
         "number": "287312832",
-        "start_date": "2022-04-23T19:18:47.210Z",
+        "start_date": "2022-09-23T19:18:47.210Z",
         "patient": {
             "id": 93229123,
             "name": "Caio Carneiro",
@@ -47,7 +47,7 @@ const data = {
         "price": 213.3
     }, {
         "number": "283718273",
-        "start_date": "2022-04-22T19:18:47.210Z",
+        "start_date": "2022-09-22T19:18:47.210Z",
         "patient": {
             "id": 213122388,
             "name": "Luciano José",
@@ -62,7 +62,7 @@ const data = {
         "price": 88.99
     }, {
         "number": "009090321938",
-        "start_date": "2022-04-20T19:18:47.210Z",
+        "start_date": "2022-09-20T19:18:47.210Z",
         "patient": {
             "id": 3367263,
             "name": "Felício Santos",
@@ -77,7 +77,7 @@ const data = {
         "price": 828.99
     }, {
         "number": "8787128731",
-        "start_date": "2022-04-01T19:18:47.210Z",
+        "start_date": "2022-09-01T19:18:47.210Z",
         "patient": {
             "id": 777882,
             "name": "Fernando Raposo"
@@ -91,7 +91,7 @@ const data = {
         "price": 772
     }, {
         "number": "12929321",
-        "start_date": "2022-04-02T19:18:47.210Z",
+        "start_date": "2022-09-02T19:18:47.210Z",
         "patient": {
             "id": 221,
             "name": "Paciente com nome grante pra colocar text ellipsis testando nome com paciente grande"
@@ -106,16 +106,34 @@ const data = {
     }]
 }
 
-const { insurances, guides } = data;
 const table = document.getElementById('table');
 const tbody = document.getElementById('tbody');
 const select = document.getElementById('sel');
 const search = document.getElementById('search');
+const dateStartInput = document.getElementById('month-start');
+const dateEndInput = document.getElementById('month-end');
+const monthBtn = document.getElementById('month');
+const todayBtn = document.getElementById('today');
 
-const renderTable = (guides) => {
+const { insurances, guides } = data;
+
+let currentPage = 1;
+let itemsPerPage = 2;
+let filteredGuides;
+let filteredItems;
+
+const init = () => {
+    changeDateFilter('month');
+    renderTable(guides);
+    renderSelect(insurances);
+    filterTable();
+    paginationStructure(filteredGuides, 2);
+};
+
+const renderTable = guides => {
     let html = '';
 
-    if (guides.length === 0) {
+    if (!guides.length) {
         html += `
         <tr>
         <td colspan="5" id="footer">Nenhuma guia encontrada</td>
@@ -144,11 +162,9 @@ const renderTable = (guides) => {
     });
 
     tbody.innerHTML = html;
-}
+};
 
-renderTable(guides)
-
-const renderSelect = (insurances) => {
+const renderSelect = insurances => {
     let html = `<option value="">Convênio</option>`;
 
     insurances.forEach(insurance => {
@@ -156,83 +172,99 @@ const renderSelect = (insurances) => {
     });
 
     select.innerHTML = html;
-}
+};
 
-renderSelect(insurances);
-
-const formatDate = (date) => {
+const formatDate = date => {
     return new Date(date).toISOString().slice(0, 10);
-}
+};
 
-const dateStartInput = document.getElementById('month-start');
-const dateEndInput = document.getElementById('month-end');
+const changeDateFilter = buttonType => {
 
-const changeDateFilter = (type) => {
-
-    if (type === 'month') {
+    if (buttonType === 'month') {
         const rawDate = new Date();
         const firstDay = new Date(rawDate.getFullYear(), rawDate.getMonth(), 1);
         dateStartInput.value = `${formatDate(firstDay)}`;
 
         const lastDay = new Date(rawDate.getFullYear(), rawDate.getMonth() + 1, 0);
         dateEndInput.value = `${formatDate(lastDay)}`;
+
+        // todayBtn.classList.remove('active');
+        // monthBtn.classList.add('active');
     }
 
-    if (type === 'today') {
+    if (buttonType === 'today') {
         dateStartInput.value = `${formatDate(new Date())}`;
         dateEndInput.value = `${formatDate(new Date())}`;
+
+        // monthBtn.classList.remove('active');
+        // todayBtn.classList.add('active');
     }
-}
+};
+
+const activeButton = (buttonType) => {
+    let monthActive = monthBtn.classList.contains('active');
+    let todayActive = todayBtn.classList.contains('active');
+    
+    if (buttonType === 'today') {
+        monthBtn.classList.remove('active');
+        todayBtn.classList.add('active');
+    }
+
+    if (buttonType === 'month') {
+        todayBtn.classList.remove('active');
+        monthBtn.classList.add('active');
+    }
+
+    if (!todayActive){
+        monthBtn.classList.remove('active');
+    } else {
+        todayBtn.classList.remove('active');
+    }
+
+    filterTable();
+};
 
 const normalizeValue = value => {
     return value.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-let currentPage = 1;
-let itemsPerPage = 2;
+};
 
 const paginate = (page = 1, filtered) => {
-    // console.log(page)
     currentPage = page;
 
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
     const offset = (currentPage - 1) * itemsPerPage;
 
     const paginatedGuides = filtered.slice(offset).slice(0, itemsPerPage);
-    console.log(paginatedGuides)
+
+    paginationStructure(filteredGuides, 2);
     renderTable(paginatedGuides);
-}
+};
 
 const paginationStructure = (guides, itemsPerPage) => {
     const pages = document.getElementById('pages');
-    const totalPages = Math.ceil(guides.length / itemsPerPage)
-    const offset = (currentPage - 1) * itemsPerPage;
-
-    console.log(currentPage);
-
-    const paginatedGuides = guides.slice(offset).slice(0, itemsPerPage);
-    console.log(paginatedGuides);
-
-    if (!filteredGuides.length) return;
-
-    pages.innerHTML += `
+    filteredItems = filteredGuides.length;
+    const totalPages = Math.ceil(guides.length / itemsPerPage);
+    let html = '';
+    
+    if (filteredItems){
+        html += `
         <li class="page-item"><a class="page-link" href="#" onClick="filterTable(1)">Primeira</a><li>
         <li class="page-item"><a class="page-link" href="#" onClick="filterTable(currentPage - 1)">Anterior</a><li>
         `
-
-    for (let i = 1; i <= totalPages; i++) {
-        pages.innerHTML += `
-        <li class="page-item"><a class="page-link" currentPage="${i}" href="#" onClick="filterTable(${i})">${i}</a><li>
-        `
-    }
-
-    pages.innerHTML += `
-        <li class="page-item"><a class="page-link" href="#" onClick="filterTable(currentPage + 1)" >Próxima</a><li>
-        <li class="page-item"><a class="page-link" href="#" onClick="filterTable(${currentPage}, true)">Última</a><li>
-
-        `
-}
-let filteredGuides;
+        
+        for (let i = 1; i <= totalPages; i++) {
+            html += `
+            <li class="page-item"><a class="page-link" currentPage="${i}" href="#" onClick="filterTable(${i})">${i}</a><li>
+            `
+        }
+    
+        html += `
+            <li class="page-item"><a class="page-link" href="#" onClick="filterTable(currentPage + 1)" >Próxima</a><li>
+            <li class="page-item"><a class="page-link" href="#" onClick="filterTable(${currentPage}, true)">Última</a><li>
+            `
+    } 
+    
+    pages.innerHTML = html;
+};
 
 const filterTable = (currentPage, lastPage = false) => {
     const selectValue = ~~document.getElementById('sel').value;
@@ -243,11 +275,11 @@ const filterTable = (currentPage, lastPage = false) => {
     if (currentPage < 1) {
         currentPage = 1;
     }
-
-    if (currentPage >= guides.length - 1) {
-        return currentPage = currentPage - 1;
+    
+    if (currentPage > filteredItems / 2) { 
+        return;
     }
-
+    
     if (!selectValue && !searchInputValue && !dateStartInputValue && !dateEndInputValue) {
         return;
     }
@@ -261,69 +293,40 @@ const filterTable = (currentPage, lastPage = false) => {
         if (!patientName.includes(searchInputValue) && !number.includes(searchInputValue)) {
             isValid = false;
         }
-
-        if (!(element.health_insurance.id === selectValue || selectValue === 0)) {
+        
+        if (!(element.health_insurance.id === selectValue || !selectValue)) {
             isValid = false;
         }
-
+        
         if (dateStartInputValue > dateEndInputValue) {
             isValid = false;
         }
-
+        
         if (!(startDate > dateStartInputValue && startDate < dateEndInputValue)) {
             isValid = false;
         }
-
+        
         return isValid;
-    })
-
+    });
+    
     filteredGuides.sort((date, nextDate) => {
         if (formatDate(date.start_date) > formatDate(nextDate.start_date)) {
             return 1;
         }
-
+        
         if (formatDate(date.start_date) < formatDate(nextDate.start_date)) {
             return -1;
         }
-
+        
         return 0;
     });
-
-    // let ordered = false;
-
-    // console.log(renderOrderedTable);
-
-    // const orderDates = () => {
-    //     const orderIcon = document.getElementById('order-icon');
-
-    //     if(!ordered){
-    //         orderIcon.classList.remove('fa-solid fa-sort-up');
-    //         orderIcon.classList.add('fa-solid fa-sort-down');
-    //         ordered = true;
-    //         renderOrderedTable(guides.start_date);
-    //         return;
-    //     }
-
-    //     if(ordered){
-    //         orderIcon.classList.remove('fa-solid fa-sort-down');
-    //         orderIcon.classList.add('fa-solid fa-sort-up');
-    //         ordered = false;
-    //         renderOrderedTable(guides.start_date);
-    //         return;
-    //     }
-    //     orderDates();
-    // }
-
-    if(lastPage) {
-        currentPage = filteredGuides.length / 2; 
+    
+    if (lastPage) {
+        currentPage = filteredGuides.length / 2;
     }
-
-    // console.log(currentPage)
+    
     paginate(currentPage, filteredGuides);
-}
+    // monthBtn.classList.add('active');
+};
 
-changeDateFilter('month');
-filterTable();
-
-
-paginationStructure(guides, 2);
+init();

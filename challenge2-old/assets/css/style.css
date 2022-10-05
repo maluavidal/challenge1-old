@@ -56,10 +56,13 @@ td {
     margin-left: 30px;
 }
 
-#month:hover, #today:hover{
+#month:hover, #today:hover {
     background-color: rgb(30, 154, 230);
     color: white;
     border: solid 1px darkblue;
+}
+.active {
+    background-color: rgb(30, 154, 230);
 }
 
 .page-link { 

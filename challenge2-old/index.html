@@ -17,10 +17,10 @@
     <p>Pesquisar</p>
     <input id="search" class="form-control" type="text" placeholder="Buscar..." onkeyup="filterTable()">
     <select id="sel" class="form-control" onchange="filterTable()"></select>
-    <input type="date" class="el-height spacing" id="month-start" onchange="filterTable()">
-    <input type="date" class="el-height" id="month-end" onchange="filterTable()">
-    <button class="el-height" id="month" onclick="changeDateFilter('month')">Mês</button>
-    <button class="el-height" id="today" onclick="changeDateFilter('today')">Hoje</button>
+    <input type="date" class="el-height spacing" id="month-start" onchange="activeButton()">
+    <input type="date" class="el-height" id="month-end" onchange="activeButton()">
+    <button class="el-height active" id="month" onclick="changeDateFilter('month'), activeButton('month'), filterTable(1)">Mês</button>
+    <button class="el-height" id="today" onclick="changeDateFilter('today'), activeButton('today'), filterTable(1)">Hoje</button>
   </div>
 
   <table class="table">
