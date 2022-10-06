@@ -108,12 +108,10 @@ const data = {
 
 const table = document.getElementById('table');
 const tbody = document.getElementById('tbody');
-const select = document.getElementById('sel');
+const select = document.getElementById('select');
 const search = document.getElementById('search');
 const dateStartInput = document.getElementById('month-start');
 const dateEndInput = document.getElementById('month-end');
-const monthBtn = document.getElementById('month');
-const todayBtn = document.getElementById('today');
 
 const { insurances, guides } = data;
 
@@ -125,7 +123,7 @@ let filteredItems;
 const init = () => {
     changeDateFilter('month');
     renderTable(guides);
-    renderSelect(insurances);
+    renderSelectInsurances(insurances);
     filterTable();
     paginationStructure(filteredGuides, 2);
 };
@@ -142,20 +140,14 @@ const renderTable = guides => {
     }
 
     guides.forEach(guide => {
-        let deleted = '';
-        let hoverDeleted = '';
-
-        if (guide.health_insurance.is_deleted) {
-            deleted = 'deleted';
-            hoverDeleted = 'Convênio Apagado';
-        };
+        const healthInsuranceClass = guide.health_insurance.is_deleted ? 'class="deleted" title="Convênio apagado"' : '';
 
         html += `
         <tr>
             <td>${new Date(guide.start_date).toLocaleDateString('pt-BR')}</td>
             <td>${guide.number}</td>
             <td><img id="img" src="${guide.patient.thumb_url || "https://via.placeholder.com/150x150.jpg"}"/>${guide.patient.name}</td>
-            <td class="${deleted}" title="${hoverDeleted}">${guide.health_insurance.name}</td>
+            <td ${healthInsuranceClass}>${guide.health_insurance.name}</td>
             <td>${guide.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
         </tr>
         `
@@ -164,7 +156,7 @@ const renderTable = guides => {
     tbody.innerHTML = html;
 };
 
-const renderSelect = insurances => {
+const renderSelectInsurances = insurances => {
     let html = `<option value="">Convênio</option>`;
 
     insurances.forEach(insurance => {
@@ -187,37 +179,30 @@ const changeDateFilter = buttonType => {
 
         const lastDay = new Date(rawDate.getFullYear(), rawDate.getMonth() + 1, 0);
         dateEndInput.value = `${formatDate(lastDay)}`;
-
-        // todayBtn.classList.remove('active');
-        // monthBtn.classList.add('active');
     }
 
     if (buttonType === 'today') {
         dateStartInput.value = `${formatDate(new Date())}`;
         dateEndInput.value = `${formatDate(new Date())}`;
-
-        // monthBtn.classList.remove('active');
-        // todayBtn.classList.add('active');
     }
 };
 
-const activeButton = (buttonType) => {
-    let monthActive = monthBtn.classList.contains('active');
-    let todayActive = todayBtn.classList.contains('active');
-    
-    if (buttonType === 'today') {
-        monthBtn.classList.remove('active');
-        todayBtn.classList.add('active');
-    }
+const onChangeDateFilter = buttonType => {
+    const monthBtn = document.getElementById('month');
+    const todayBtn = document.getElementById('today');
 
     if (buttonType === 'month') {
         todayBtn.classList.remove('active');
         monthBtn.classList.add('active');
     }
 
-    if (!todayActive){
+    if (buttonType === 'today') {
         monthBtn.classList.remove('active');
-    } else {
+        todayBtn.classList.add('active');
+    }
+
+    if (!buttonType) {
+        monthBtn.classList.remove('active');
         todayBtn.classList.remove('active');
     }
 
@@ -247,27 +232,42 @@ const paginationStructure = (guides, itemsPerPage) => {
     
     if (filteredItems){
         html += `
-        <li class="page-item"><a class="page-link" href="#" onClick="filterTable(1)">Primeira</a><li>
-        <li class="page-item"><a class="page-link" href="#" onClick="filterTable(currentPage - 1)">Anterior</a><li>
+        <li class="page-item"><a id="firstPage" class="page-link " href="#" onClick="filterTable(1), onChangePage('firstPage')">Primeira</a><li>
+        <li class="page-item"><a id="previousPage"class="page-link " href="#" onClick="filterTable(currentPage - 1), onChangePage('previousPage')">Anterior</a><li>
         `
         
         for (let i = 1; i <= totalPages; i++) {
+            let active
+            (i === currentPage) ? active = 'active' : ''
             html += `
-            <li class="page-item"><a class="page-link" currentPage="${i}" href="#" onClick="filterTable(${i})">${i}</a><li>
+            <li class="page-item"><a id="currentPage" class="page-link ${active}" currentPage="${i}" href="#" onClick="filterTable(${i}), onChangePage('currentPage')">${i}</a><li>
             `
         }
     
         html += `
-            <li class="page-item"><a class="page-link" href="#" onClick="filterTable(currentPage + 1)" >Próxima</a><li>
-            <li class="page-item"><a class="page-link" href="#" onClick="filterTable(${currentPage}, true)">Última</a><li>
+            <li class="page-item"><a id="nextPage" class="page-link " href="#" onClick="filterTable(currentPage + 1), onChangePage('nextPage')" >Próxima</a><li>
+            <li class="page-item"><a id="lastPage" class="page-link " href="#" onClick="filterTable(${currentPage}, true), onChangePage('lastPage')">Última</a><li>
             `
     } 
     
     pages.innerHTML = html;
 };
 
+const onChangePage = (selectedPage) => {
+    const firstPage = document.getElementById('firstPage');
+    const lastPage = document.getElementById('lastPage');
+
+    if (selectedPage === 'firstPage'){
+        firstPage.classList.add('active');
+    }
+
+    if (selectedPage === 'lastPage'){
+        lastPage.classList.add('active');
+    }
+}
+
 const filterTable = (currentPage, lastPage = false) => {
-    const selectValue = ~~document.getElementById('sel').value;
+    const selectValue = ~~document.getElementById('select').value;
     const searchInputValue = normalizeValue(search.value);
     const dateStartInputValue = document.getElementById('month-start').value;
     const dateEndInputValue = document.getElementById('month-end').value;
@@ -326,7 +326,6 @@ const filterTable = (currentPage, lastPage = false) => {
     }
     
     paginate(currentPage, filteredGuides);
-    // monthBtn.classList.add('active');
 };
 
 init();

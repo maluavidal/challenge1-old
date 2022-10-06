@@ -16,11 +16,11 @@
   <div id="search-div">
     <p>Pesquisar</p>
     <input id="search" class="form-control" type="text" placeholder="Buscar..." onkeyup="filterTable()">
-    <select id="sel" class="form-control" onchange="filterTable()"></select>
-    <input type="date" class="el-height spacing" id="month-start" onchange="activeButton()">
-    <input type="date" class="el-height" id="month-end" onchange="activeButton()">
-    <button class="el-height active" id="month" onclick="changeDateFilter('month'), activeButton('month'), filterTable(1)">Mês</button>
-    <button class="el-height" id="today" onclick="changeDateFilter('today'), activeButton('today'), filterTable(1)">Hoje</button>
+    <select id="select" class="form-control" onchange="filterTable()"></select>
+    <input type="date" class="el-height spacing" id="month-start" onchange="onChangeDateFilter()">
+    <input type="date" class="el-height" id="month-end" onchange="onChangeDateFilter()">
+    <button class="el-height active" id="month" onclick="changeDateFilter('month'), onChangeDateFilter('month'), filterTable(1)">Mês</button>
+    <button class="el-height" id="today" onclick="changeDateFilter('today'), onChangeDateFilter('today'), filterTable(1)">Hoje</button>
   </div>
 
   <table class="table">
