@@ -113,17 +113,17 @@ const search = document.getElementById('search');
 const dateStartInput = document.getElementById('month-start');
 const dateEndInput = document.getElementById('month-end');
 
+const itemsPerPage = 2;
 const { insurances, guides } = data;
 
 let currentPage = 1;
-let itemsPerPage = 2;
 let filteredGuides;
-let filteredItems;
+let guidesAmount;
 
 const init = () => {
     changeDateFilter('month');
     renderTable(guides);
-    renderSelectInsurances(insurances);
+    renderSelectedInsurances(insurances);
     filterTable();
     paginationStructure(filteredGuides, 2);
 };
@@ -156,7 +156,7 @@ const renderTable = guides => {
     tbody.innerHTML = html;
 };
 
-const renderSelectInsurances = insurances => {
+const renderSelectedInsurances = insurances => {
     let html = `<option value="">Convênio</option>`;
 
     insurances.forEach(insurance => {
@@ -171,6 +171,8 @@ const formatDate = date => {
 };
 
 const changeDateFilter = buttonType => {
+    const monthBtn = document.getElementById('month');
+    const todayBtn = document.getElementById('today');
 
     if (buttonType === 'month') {
         const rawDate = new Date();
@@ -179,24 +181,14 @@ const changeDateFilter = buttonType => {
 
         const lastDay = new Date(rawDate.getFullYear(), rawDate.getMonth() + 1, 0);
         dateEndInput.value = `${formatDate(lastDay)}`;
-    }
 
-    if (buttonType === 'today') {
-        dateStartInput.value = `${formatDate(new Date())}`;
-        dateEndInput.value = `${formatDate(new Date())}`;
-    }
-};
-
-const onChangeDateFilter = buttonType => {
-    const monthBtn = document.getElementById('month');
-    const todayBtn = document.getElementById('today');
-
-    if (buttonType === 'month') {
         todayBtn.classList.remove('active');
         monthBtn.classList.add('active');
     }
 
     if (buttonType === 'today') {
+        dateStartInput.value = `${formatDate(new Date())}`;
+        dateEndInput.value = `${formatDate(new Date())}`;
         monthBtn.classList.remove('active');
         todayBtn.classList.add('active');
     }
@@ -217,8 +209,8 @@ const paginate = (page = 1, filtered) => {
     currentPage = page;
 
     const offset = (currentPage - 1) * itemsPerPage;
-
-    const paginatedGuides = filtered.slice(offset).slice(0, itemsPerPage);
+    const slicedItemsWithOffset = filtered.slice(offset);
+    const paginatedGuides = slicedItemsWithOffset.slice(0, itemsPerPage);
 
     paginationStructure(filteredGuides, 2);
     renderTable(paginatedGuides);
@@ -226,27 +218,27 @@ const paginate = (page = 1, filtered) => {
 
 const paginationStructure = (guides, itemsPerPage) => {
     const pages = document.getElementById('pages');
-    filteredItems = filteredGuides.length;
+    guidesAmount = filteredGuides.length;
     const totalPages = Math.ceil(guides.length / itemsPerPage);
     let html = '';
     
-    if (filteredItems){
+    if (guidesAmount){
         html += `
-        <li class="page-item"><a id="firstPage" class="page-link " href="#" onClick="filterTable(1), onChangePage('firstPage')">Primeira</a><li>
-        <li class="page-item"><a id="previousPage"class="page-link " href="#" onClick="filterTable(currentPage - 1), onChangePage('previousPage')">Anterior</a><li>
+        <li class="page-item"><a id="firstPage" class="page-link " href="#" onClick="filterTable(1)">Primeira</a><li>
+        <li class="page-item"><a id="previousPage"class="page-link " href="#" onClick="filterTable(currentPage - 1)">Anterior</a><li>
         `
         
         for (let i = 1; i <= totalPages; i++) {
             let active
             (i === currentPage) ? active = 'active' : ''
             html += `
-            <li class="page-item"><a id="currentPage" class="page-link ${active}" currentPage="${i}" href="#" onClick="filterTable(${i}), onChangePage('currentPage')">${i}</a><li>
+            <li class="page-item"><a id="currentPage" class="page-link ${active}" currentPage="${i}" href="#" onClick="filterTable(${i})">${i}</a><li>
             `
         }
     
         html += `
-            <li class="page-item"><a id="nextPage" class="page-link " href="#" onClick="filterTable(currentPage + 1), onChangePage('nextPage')" >Próxima</a><li>
-            <li class="page-item"><a id="lastPage" class="page-link " href="#" onClick="filterTable(${currentPage}, true), onChangePage('lastPage')">Última</a><li>
+            <li class="page-item"><a id="nextPage" class="page-link " href="#" onClick="filterTable(currentPage + 1)" >Próxima</a><li>
+            <li class="page-item"><a id="lastPage" class="page-link " href="#" onClick="filterTable(${currentPage}, true)">Última</a><li>
             `
     } 
     
@@ -276,7 +268,7 @@ const filterTable = (currentPage, lastPage = false) => {
         currentPage = 1;
     }
     
-    if (currentPage > filteredItems / 2) { 
+    if (currentPage > guidesAmount / 2) { 
         return;
     }
     
