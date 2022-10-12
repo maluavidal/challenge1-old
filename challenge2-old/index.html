@@ -19,8 +19,8 @@
     <select id="select" class="form-control" onchange="filterTable()"></select>
     <input type="date" class="el-height spacing" id="month-start" onchange="changeDateFilter()">
     <input type="date" class="el-height" id="month-end" onchange="changeDateFilter()">
-    <button class="el-height active" id="month" onclick="changeDateFilter('month'), filterTable(1)">Mês</button>
-    <button class="el-height" id="today" onclick="changeDateFilter('today'), filterTable(1)">Hoje</button>
+    <button class="el-height active" id="month" onclick="changeDateFilter('month'), onPageChange(1)">Mês</button>
+    <button class="el-height" id="today" onclick="changeDateFilter('today'), onPageChange(1)">Hoje</button>
   </div>
 
   <table class="table">
@@ -44,6 +44,8 @@
     <ul id="pages" class="li"></ul>
   </nav>
 
+
+<script src="./lib/moment/moment.min.js"></script>
 <script src="./assets/js/main.js"></script>
 </body>
 
