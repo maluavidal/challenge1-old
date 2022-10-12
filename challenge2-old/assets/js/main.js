@@ -11,6 +11,7 @@ const dateEndInput = document.getElementById('month-end');
 const itemsPerPage = 2;
 
 let currentPage = 1;
+let totalPages;
 let filteredGuides;
 let guidesAmount;
 let guides = [];
@@ -40,7 +41,6 @@ const renderTable = guidesParams => {
     let html = '';
     filteredGuides = guidesParams;
 
-    console.log(guidesParams)
     if (!guidesParams.length) {
         html += `
         <tr>
@@ -51,12 +51,12 @@ const renderTable = guidesParams => {
 
     guidesParams.forEach(async guide => {
         const priceValue = guide.price === 'NaN' ? 0 : guide.price;
-        const healtinsuranceName = guide && guide.health_insurance && guide.health_insurance.name ? guide.health_insurance.name : '';
+        const healtinsuranceName = guide?.health_insurance?.name ? guide.health_insurance.name : '';
         const healthInsuranceClass = guide && guide.health_insurance && guide.health_insurance.is_deleted ? 'class="deleted" title="Convênio apagado"' : '';
 
         html += `
         <tr>
-            <td>${new Date(guide.start_date).toLocaleDateString('pt-BR')}</td>
+            <td>${moment(guide.start_date).format('DD/MM/YYYY')}</td>
             <td>${guide.number || '-'}</td>
             <td><img id="img" src="${guide.patient.thumb_url || "https://via.placeholder.com/150x150.jpg"}"/>${guide.patient.name}</td>
             <td ${healthInsuranceClass}>${healtinsuranceName}</td>
@@ -64,6 +64,7 @@ const renderTable = guidesParams => {
         </tr>
         `
     });
+
 
     tbody.innerHTML = html;
 };
@@ -80,7 +81,7 @@ const renderSelectedInsurances = insurancesParams => {
 };
 
 const formatDate = date => {
-    return new Date(date).toISOString().slice(0, 10);
+    return moment(date).format('YYYY-MM-DD');
 };
 
 const changeDateFilter = buttonType => {
@@ -88,20 +89,17 @@ const changeDateFilter = buttonType => {
     const todayBtn = document.getElementById('today');
 
     if (buttonType === 'month') {
-        const rawDate = new Date();
-        const firstDay = new Date(rawDate.getFullYear(), rawDate.getMonth(), 1);
-        dateStartInput.value = `${formatDate(firstDay)}`;
-
-        const lastDay = new Date(rawDate.getFullYear(), rawDate.getMonth() + 1, 0);
-        dateEndInput.value = `${formatDate(lastDay)}`;
+        dateStartInput.value = moment().startOf('month').format('YYYY-MM-DD');
+        dateEndInput.value = moment().endOf('month').format('YYYY-MM-DD');
 
         todayBtn.classList.remove('active');
         monthBtn.classList.add('active');
     }
 
     if (buttonType === 'today') {
-        dateStartInput.value = `${formatDate(new Date())}`;
-        dateEndInput.value = `${formatDate(new Date())}`;
+        dateStartInput.value = moment().format('YYYY-MM-DD');
+        dateEndInput.value = moment().format('YYYY-MM-DD');
+        
         monthBtn.classList.remove('active');
         todayBtn.classList.add('active');
     }
@@ -122,9 +120,9 @@ const paginate = (page = 1, filtered) => {
     currentPage = page;
 
     const offset = (currentPage - 1) * itemsPerPage;
-    const slicedItemsWithOffset = filtered && filtered.slice(offset);
-    const paginatedGuides = slicedItemsWithOffset && slicedItemsWithOffset.slice(0, itemsPerPage);
-
+    const slicedItemsWithOffset = filtered?.slice(offset);
+    const paginatedGuides = slicedItemsWithOffset?.slice(0, itemsPerPage);
+    
     paginationStructure(filteredGuides, 2);
     renderTable(paginatedGuides);
 };
@@ -132,7 +130,7 @@ const paginate = (page = 1, filtered) => {
 const paginationStructure = (guides, itemsPerPage) => {
     const pages = document.getElementById('pages');
     guidesAmount = filteredGuides.length;
-    const totalPages = Math.ceil(guides.length / itemsPerPage);
+    totalPages = Math.ceil(guides.length / itemsPerPage);
     let html = '';
 
     if (guidesAmount) {
@@ -142,7 +140,7 @@ const paginationStructure = (guides, itemsPerPage) => {
         `
 
         for (let i = 1; i <= totalPages; i++) {
-            let active
+            let active;
             (i === currentPage) ? active = 'active' : ''
             html += `
             <li class="page-item"><a id="currentPage" class="page-link ${active}" currentPage="${i}" href="#" onClick="onPageChange(${i})">${i}</a><li>
@@ -163,7 +161,7 @@ const onPageChange = (currentPage) => {
         currentPage = 1;
     }
 
-    if (currentPage > guidesAmount / 2) {
+    if (currentPage > totalPages) {
         return;
     }
 
@@ -177,7 +175,9 @@ const filterTable = (currentPage) => {
     const dateEndInputValue = document.getElementById('month-end').value;
 
     if (!dateStartInputValue && !dateEndInputValue) {
-        paginate(guides);
+        filteredGuides = guides;
+        paginate(1, guides);
+        return;
     }
 
     if (!selectValue && !searchInputValue && !dateStartInputValue && !dateEndInputValue) {
@@ -199,11 +199,15 @@ const filterTable = (currentPage) => {
             isValid = false;
         }
 
-        if (!dateEndInputValue && !dateStartInputValue) {
+        if (dateStartInputValue && dateEndInputValue && !(moment(startDate).isBetween(dateStartInputValue, dateEndInputValue))) {
             isValid = false;
         }
 
-        if (!(startDate > dateStartInputValue && startDate < dateEndInputValue)) {
+        if (dateStartInputValue && !dateEndInputValue && !(moment(startDate).isAfter(dateStartInputValue))) {
+            isValid = false;
+        }
+
+        if (!dateStartInputValue && dateEndInputValue && !(moment(startDate).isBefore(dateEndInputValue))) {
             isValid = false;
         }
 
@@ -222,8 +226,6 @@ const filterTable = (currentPage) => {
 
         return 0;
     });
-
-    // renderTable(paginatedGuides);
 
     paginate(currentPage, filteredGuides);
 };
