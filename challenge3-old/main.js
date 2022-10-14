@@ -5123,60 +5123,45 @@ const data = [
         "received_value": 1800,
         "price": 1800,
         "liquid_price": 1800,
-        "finance_id": 11186456
+        "finance_id": 1
     }
 ]
 
-// const proceduresBy = () => {
-//     const proceduresById = {};
-//     const proceduresByGroupKey = {};
-//     const proceduresByAttendanceId = {};
-//     const proceduresByFinanceId = {};
+const formatDate = date => {
+    return new Date(date).toLocaleDateString('pt-br');
+}
 
-//     data.forEach(procedure => {
-//         if (!proceduresById[procedure.procedure_id]) {
+const getArrayLength = (arr, key) => {
+	const collection = { };
 
-//             proceduresById[procedure.procedure_id] = 0;
-//         }
-//         proceduresById[procedure.procedure_id]++;
+	arr.forEach(currentElement => {
+        if (key === 'created_at') {
+            currentElement[key] = formatDate(currentElement[key]);
+        }
 
-//         if (!proceduresByGroupKey[procedure.group_key]) {
+        const dataKey = currentElement[key];
 
-//             proceduresByGroupKey[procedure.group_key] = 0;
-//         }
-//         proceduresByGroupKey[procedure.group_key]++;
+        if (!collection[dataKey]) {
+			collection[dataKey] = {
+                amount: 0,
+            }
 
-//         if (!proceduresByAttendanceId[procedure.attendance_id]) {
+            collection[dataKey].amount++;
+            return;
+		}
 
-//             proceduresByAttendanceId[procedure.attendance_id] = 0;
-//         }
-//         proceduresByAttendanceId[procedure.attendance_id]++;
+        collection[dataKey].amount++;
+	});
 
-//         if (!proceduresByFinanceId[procedure.finance_id]) {
+    return collection;
+};
 
-//             proceduresByFinanceId[procedure.finance_id] = 0;
-//         }
-//         proceduresByFinanceId[procedure.finance_id]++;
-
-//     });
-//     console.log(proceduresById);
-// }
-
-// proceduresBy();
-
-const elements = [{
-    id: 1,
-    element: 'Full com number 1'
-}, {
-    id: 1,
-    element: 'Full com number 1'
-}, {
-    id: 3,
-    element: 'Full com number 3'
-}, {
-    id: 4,
-    element: 'Full com number 4'
-}]
+// console.log('Amount of procedures grouped by ID', getArrayLength(data, 'procedure_id'))
+// console.log('Amount of procedures grouped by group_key', getArrayLength(data, 'group_key'))
+// console.log('Amount of procedures grouped by attendance ID', getArrayLength(data, 'attendance_id'))
+// console.log('Amount of procedures grouped by finance ID', getArrayLength(data, 'finance_id'))
+// console.log('Amount per guide type', getArrayLength(data, 'tiss_type'))
+// console.log('Amount per date', getArrayLength(data, 'created_at'))
 
 const arrayToObject = (arr, key) => {
 	const collection = { };
@@ -5185,17 +5170,53 @@ const arrayToObject = (arr, key) => {
         const dataKey = currentElement[key];
 
         if (!collection[dataKey]) {
-			collection[dataKey] = {
-                data: []
-            }
+			collection[dataKey] = { data: [] }
 
             collection[dataKey].data.push(currentElement);
-
             return;
 		}
 
         collection[dataKey].data.push(currentElement);
 	});
 
-	return collection;
+    return collection;
 };
+
+// console.log('Procedures grouped by attendance', arrayToObject(data, 'attendance_id'))
+// console.log('Procedures grouped by finance', arrayToObject(data, 'finance_id'))
+
+const getFinancials = (arr, key) => {
+	const collection = { };
+
+	arr.forEach(currentElement => {
+        const dataKeyValid = currentElement[key];
+        const dataKey = dataKeyValid || 'Procedure ID not available';
+        const price = currentElement.price;
+        const liquidPrice = currentElement.liquid_price;
+        const receivedValue = currentElement.received_value;
+
+        if (!collection[dataKey]) {
+            collection[dataKey] = {
+                price: 0,
+                liquid_price: 0,
+                received_value: 0,
+                non_received_value: 0
+            }
+
+            collection[dataKey].price += price;
+            collection[dataKey].liquid_price += liquidPrice;
+            collection[dataKey].received_value += receivedValue;
+            collection[dataKey].non_received_value += liquidPrice - receivedValue || 0;
+            return;
+		}
+
+        collection[dataKey].price += price;
+        collection[dataKey].liquid_price += liquidPrice;
+        collection[dataKey].received_value += receivedValue;
+	});
+
+    return collection;
+};
+
+// console.log('Financial data', getFinancials(data, 'procedure_id'))
+

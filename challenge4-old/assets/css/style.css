@@ -1,0 +1,11 @@
+.blueBackground {
+    background-color: rgb(68, 124, 254);
+}
+
+#select {
+    display: flex;
+    width: 160px;
+    margin-left: 30px;
+    border-radius: 0px;
+    color: #212529;
+}

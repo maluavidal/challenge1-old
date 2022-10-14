@@ -34,7 +34,7 @@ const init = async () => {
 
 const getFetch = async url => {
     const response = await fetch(url)
-    return await response.json()
+    return response.json()
 }
 
 const renderTable = guidesParams => {
@@ -49,7 +49,7 @@ const renderTable = guidesParams => {
         `
     }
 
-    guidesParams.forEach(async guide => {
+    guidesParams.forEach(guide => {
         const priceValue = guide.price === 'NaN' ? 0 : guide.price;
         const healtinsuranceName = guide?.health_insurance?.name ? guide.health_insurance.name : '';
         const healthInsuranceClass = guide && guide.health_insurance && guide.health_insurance.is_deleted ? 'class="deleted" title="Convênio apagado"' : '';
