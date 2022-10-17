@@ -1,11 +1,51 @@
-.blueBackground {
-    background-color: rgb(68, 124, 254);
+#select {
+    background-color: rgb(29, 124, 248);
+    width: 80px;
+    border-radius: 3px;
+    color: #212529;
+    margin-bottom: 20px;
+    color: white;
 }
 
-#select {
+#head-div {
     display: flex;
-    width: 160px;
-    margin-left: 30px;
-    border-radius: 0px;
-    color: #212529;
+}
+
+body {
+    padding: 30px;
+    font-size: 15px;
+}
+
+th {
+    background-color: rgb(29, 124, 248);
+    color: white;
+    padding: 20px;
+}
+
+td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 20px;
+}
+
+table {
+    margin: 0;
+    display: block;
+}
+
+table tr:nth-child(odd) td{
+    background-color: white;
+}
+table tr:nth-child(even) td{
+    background-color: whitesmoke;
+}
+
+.center {
+    text-align: center;
+}
+
+#footer{
+    text-align: center;
+    font-size: 18px;
 }

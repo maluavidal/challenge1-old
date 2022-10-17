@@ -466,26 +466,113 @@ const data = [
     }
 ]
 
-const renderTable = element => {
-    let html = '';
+const select = document.getElementById('select');
+const tbody = document.getElementById('tbody');
 
-//     if (!element.length) {
-//         html += `
-//         <tr>
-//         <td colspan="5" id="footer">Nenhuma guia encontrada</td>
-//         </tr>
-//         `
-//     }
+let type;
+let html;
 
-    element.forEach(element => {
+const init = () => {
+    renderTable(data);
+    renderSelectedType();
+    renderFinancials();
+}
+
+const renderTable = data => {
+    html = '';
+
+
+    data.forEach(element => {
+        const fullName = `${element.customer.first_name}` + ` ${element.customer.last_name}`;
+        const totalPrice = +`${element.amount * element.price}`;
+
+        type = `${element.type}`;
+
+        if (!data.length) {
+            html += `
+                <tr>
+                <td colspan="9" id="footer">Nenhuma guia encontrada</td>
+                </tr>
+                `
+        }
+
+        if (type === 'IN') {
+            type = 'Entrada';
+        } else {
+            type = 'Saída';
+        }
+
         html += `
         <tr>
-            <td>${element.date.toLocaleString('pt-br')}</td>
-            <td>${element.customer.first_name + element.costumer.last_name}</td>
-            <td>${element.price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+            <td>${moment(element.date).format('DD/MM/YYYY')}</td>
+            <td>${fullName}</td>
+            <td>${element.customer.phone}</td>
+            <td>${element.store.name}</td>
+            <td>${element.store.phone}</td>
+            <td>${type}</td>
+            <td class="center">${element.amount}</td>
+            <td>${formatPrice(element.price)}</td>
+            <td>${formatPrice(totalPrice)}</td>
         </tr>
         `
     });
+
+    tbody.innerHTML = html;
 }
 
-renderTable()
+const formatPrice = price => price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+
+const renderSelectedType = () => {
+    html = `<option value="">Tipo</option>`;
+
+    const dataTypes = [{
+        value: 'IN',
+        label: 'Entrada'
+    }, {
+        value: 'OUT',
+        label: 'Saída'
+    }];
+
+    dataTypes.forEach(selectType => {
+        html += `<option value="${selectType.value}">${selectType.label}</option>`
+    });
+
+    select.innerHTML = html;
+}
+
+const renderFinancials = filteredValues => {
+    const financeHeader = document.getElementById('financeHeader');
+
+    const types = [{
+        type: 'IN',
+        amount: 0
+    }, {
+        type: 'OUT',
+        amount: 0
+    },];
+
+    html = '';
+
+    const filterFinancials = filteredValues.reduce((previousValue, currentValue) => {
+        return previousValue + currentValue.price;
+    }, 0);
+
+    console.log(filterFinancials, 'filterFinancials');
+
+    console.log(filterFinancials)
+}
+
+const filterTable = () => {
+    const selectValue = select.value;
+
+    if (!selectValue) {
+        renderTable(data);
+        return
+    }
+
+    const filter = data.filter(element => selectValue === element.type);
+
+    renderTable(filter)
+}
+
+init();

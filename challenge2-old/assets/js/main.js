@@ -51,7 +51,7 @@ const renderTable = guidesParams => {
 
     guidesParams.forEach(guide => {
         const priceValue = guide.price === 'NaN' ? 0 : guide.price;
-        const healtinsuranceName = guide?.health_insurance?.name ? guide.health_insurance.name : '';
+        const healthInsuranceName = guide?.health_insurance?.name ? guide.health_insurance.name : '';
         const healthInsuranceClass = guide && guide.health_insurance && guide.health_insurance.is_deleted ? 'class="deleted" title="Convênio apagado"' : '';
 
         html += `
@@ -59,7 +59,7 @@ const renderTable = guidesParams => {
             <td>${moment(guide.start_date).format('DD/MM/YYYY')}</td>
             <td>${guide.number || '-'}</td>
             <td><img id="img" src="${guide.patient.thumb_url || "https://via.placeholder.com/150x150.jpg"}"/>${guide.patient.name}</td>
-            <td ${healthInsuranceClass}>${healtinsuranceName}</td>
+            <td ${healthInsuranceClass}>${healthInsuranceName}</td>
             <td>${priceValue.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
         </tr>
         `
@@ -156,7 +156,7 @@ const paginationStructure = (guides, itemsPerPage) => {
     pages.innerHTML = html;
 };
 
-const onPageChange = (currentPage) => {
+const onPageChange = currentPage => {
     if (currentPage < 1) {
         currentPage = 1;
     }
@@ -168,7 +168,7 @@ const onPageChange = (currentPage) => {
     filterTable(currentPage);
 }
 
-const filterTable = (currentPage) => {
+const filterTable = currentPage => {
     const selectValue = ~~document.getElementById('select').value;
     const searchInputValue = normalizeValue(search.value);
     const dateStartInputValue = document.getElementById('month-start').value;

@@ -13,28 +13,39 @@
 </head>
 
 <body>
-  <div id="select-div">
-    <select id="select" class="blueBackground"></select>
+  <div style="max-width: 75%; margin: 0 auto;">
+    <div id="head-div"
+      style="width: 100%; display: flex; align-items: center; justify-content: start; margin-bottom: 20px;">
+      <select id="select" onchange="filterTable()"></select>
+      <div style="display:flex; align-items:center" id="financeHeader">
+        <p></p>
+        <p></p>
+        <p></p>
+      </div>
+    </div>
+
+    <section>
+      <table>
+        <thead class="table">
+          <tr>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Telefone do cliente</th>
+            <th>Loja</th>
+            <th>Telefone da loja</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Preço unitário</th>
+            <th>Preço total</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </section>
+    </table>
   </div>
 
-  <table>
-    <thead class="table">
-      <tr class="blueBackground">
-        <th>Data</th>
-        <th>Cliente</th>
-        <th>Telefone do cliente</th>
-        <th>Loja</th>
-        <th>Telefone da loja</th>
-        <th>Tipo</th>
-        <th>Quantidade</th>
-        <th>Preço unitário</th>
-        <th>Preço total</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-
-<script src="./assets/js/main.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+  <script src="./assets/js/main.js"></script>
 </body>
 
 </html>
