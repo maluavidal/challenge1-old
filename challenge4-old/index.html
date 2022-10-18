@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Finanças</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
     integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
   <link rel="stylesheet" href="./assets/css/style.css">
@@ -13,31 +13,26 @@
 </head>
 
 <body>
-  <div style="max-width: 75%; margin: 0 auto;">
-    <div id="head-div"
-      style="width: 100%; display: flex; align-items: center; justify-content: start; margin-bottom: 20px;">
+  <div id="head-div">
+    <div>
+      <input id="search" type="text" placeholder="Buscar..." onkeyup="filterTable()">
       <select id="select" onchange="filterTable()"></select>
-      <div style="display:flex; align-items:center" id="financeHeader">
-        <p></p>
-        <p></p>
-        <p></p>
-      </div>
     </div>
-
+    <div id="finance-header"></div>
+  </div>
+  <div id="main-div">
     <section>
-      <table>
+      <table style="width:100%">
         <thead class="table">
-          <tr>
-            <th>Data</th>
-            <th>Cliente</th>
-            <th>Telefone do cliente</th>
-            <th>Loja</th>
-            <th>Telefone da loja</th>
-            <th>Tipo</th>
-            <th>Quantidade</th>
-            <th>Preço unitário</th>
-            <th>Preço total</th>
-          </tr>
+          <th width="212">Data</th>
+          <th width="212">Cliente</th>
+          <th width="212">Telefone do cliente</th>
+          <th width="212">Loja</th>
+          <th width="212">Telefone da loja</th>
+          <th width="212">Tipo</th>
+          <th width="212">Quantidade</th>
+          <th width="212">Preço unitário</th>
+          <th width="212">Preço total</th>
         </thead>
         <tbody id="tbody"></tbody>
     </section>

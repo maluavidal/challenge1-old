@@ -467,26 +467,22 @@ const data = [
 ]
 
 const select = document.getElementById('select');
-const tbody = document.getElementById('tbody');
 
-let type;
 let html;
 
 const init = () => {
     renderTable(data);
+    renderFinancials(data)
     renderSelectedType();
-    renderFinancials();
 }
 
 const renderTable = data => {
+    const tbody = document.getElementById('tbody');
     html = '';
-
 
     data.forEach(element => {
         const fullName = `${element.customer.first_name}` + ` ${element.customer.last_name}`;
         const totalPrice = +`${element.amount * element.price}`;
-
-        type = `${element.type}`;
 
         if (!data.length) {
             html += `
@@ -496,12 +492,6 @@ const renderTable = data => {
                 `
         }
 
-        if (type === 'IN') {
-            type = 'Entrada';
-        } else {
-            type = 'Saída';
-        }
-
         html += `
         <tr>
             <td>${moment(element.date).format('DD/MM/YYYY')}</td>
@@ -509,8 +499,8 @@ const renderTable = data => {
             <td>${element.customer.phone}</td>
             <td>${element.store.name}</td>
             <td>${element.store.phone}</td>
-            <td>${type}</td>
-            <td class="center">${element.amount}</td>
+            <td>${element.type === 'IN' ? 'Entrada' : 'Saída'}</td>
+            <td>${element.amount}</td>
             <td>${formatPrice(element.price)}</td>
             <td>${formatPrice(totalPrice)}</td>
         </tr>
@@ -518,7 +508,7 @@ const renderTable = data => {
     });
 
     tbody.innerHTML = html;
-}
+};
 
 const formatPrice = price => price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
 
@@ -538,41 +528,58 @@ const renderSelectedType = () => {
     });
 
     select.innerHTML = html;
-}
+};
 
-const renderFinancials = filteredValues => {
-    const financeHeader = document.getElementById('financeHeader');
+const renderFinancials = (filteredData) => {
+    const financeHeader = document.getElementById('finance-header');
+    financeHeader.innerHTML = '';
 
-    const types = [{
-        type: 'IN',
-        amount: 0
+    const reduceFinancials = filteredData.reduce((previousValue, currentValue) => {
+        const financePrice = currentValue.price * currentValue.amount;
+
+        return {
+            income_totals: previousValue.income_totals + (currentValue.type === 'IN' ? (financePrice) : 0),
+            expense_totals: previousValue.expense_totals + (currentValue.type === 'OUT' ? (financePrice) : 0),
+            balance: previousValue.income_totals + (financePrice)
+        };
     }, {
-        type: 'OUT',
-        amount: 0
-    },];
+        income_totals: 0,
+        expense_totals: 0,
+        balance: 0
+    });
 
-    html = '';
+    financeHeader.innerHTML += `<span style="color:green">Total de entradas: ${formatPrice(reduceFinancials.income_totals)}</span>`
+    financeHeader.innerHTML += `<span style="color:red">Total de saídas: ${formatPrice(reduceFinancials.expense_totals)}</span>`
+    financeHeader.innerHTML += `<span style="color:blue">Saldo: ${formatPrice(reduceFinancials.balance)}</span>`
+};
 
-    const filterFinancials = filteredValues.reduce((previousValue, currentValue) => {
-        return previousValue + currentValue.price;
-    }, 0);
-
-    console.log(filterFinancials, 'filterFinancials');
-
-    console.log(filterFinancials)
-}
+const normalizeValue = value => {
+    return value.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+};
 
 const filterTable = () => {
+    const searchValue = normalizeValue(document.getElementById('search').value);
     const selectValue = select.value;
 
-    if (!selectValue) {
-        renderTable(data);
+    if (!selectValue && !searchValue) {
+        init();
         return
     }
 
-    const filter = data.filter(element => selectValue === element.type);
+    const filter = data.filter(element => {
+        const name = normalizeValue(`${element.customer.first_name}` + ` ${element.customer.last_name}`);
+
+        if (selectValue && searchValue) {
+            return selectValue === element.type && name.includes(searchValue);
+        } else if (selectValue && !searchValue) {
+            return selectValue === element.type
+        } else {
+            return name.includes(searchValue);
+        }
+    });
 
     renderTable(filter)
-}
+    renderFinancials(filter)
+};
 
 init();
