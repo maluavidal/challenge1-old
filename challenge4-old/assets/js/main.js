@@ -466,54 +466,52 @@ const data = [
     }
 ]
 
-const select = document.getElementById('select');
-
-let html;
-
 const init = () => {
     renderTable(data);
     renderFinancials(data)
     renderSelectedType();
-}
+};
 
 const renderTable = data => {
     const tbody = document.getElementById('tbody');
-    html = '';
+    let htmlTable = '';
+    
+    if (!data.length) {
+        htmlTable += `
+            <tr>
+            <td colspan="9" id="footer">Nenhuma guia encontrada</td>
+            </tr>
+        `
+    }
 
     data.forEach(element => {
-        const fullName = `${element.customer.first_name}` + ` ${element.customer.last_name}`;
+        const fullName = `${element.customer.first_name} ${element.customer.last_name}`;
         const totalPrice = +`${element.amount * element.price}`;
 
-        if (!data.length) {
-            html += `
-                <tr>
-                <td colspan="9" id="footer">Nenhuma guia encontrada</td>
-                </tr>
-                `
-        }
-
-        html += `
-        <tr>
-            <td>${moment(element.date).format('DD/MM/YYYY')}</td>
-            <td>${fullName}</td>
-            <td>${element.customer.phone}</td>
-            <td>${element.store.name}</td>
-            <td>${element.store.phone}</td>
-            <td>${element.type === 'IN' ? 'Entrada' : 'Saída'}</td>
-            <td>${element.amount}</td>
-            <td>${formatPrice(element.price)}</td>
-            <td>${formatPrice(totalPrice)}</td>
-        </tr>
+        htmlTable += `
+            <tr>
+                <td>${moment(element.date).format('DD/MM/YYYY')}</td>
+                <td>${fullName}</td>
+                <td>${element.customer.phone}</td>
+                <td>${element.store.name}</td>
+                <td>${element.store.phone}</td>
+                <td>${element.type === 'IN' ? 'Entrada' : 'Saída'}</td>
+                <td>${element.amount}</td>
+                <td>${formatPrice(element.price)}</td>
+                <td>${formatPrice(totalPrice)}</td>
+            </tr>
         `
     });
 
-    tbody.innerHTML = html;
+    tbody.innerHTML = htmlTable;
 };
 
-const formatPrice = price => price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+const formatPrice = price => {
+    return price.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+}
 
 const renderSelectedType = () => {
-    html = `<option value="">Tipo</option>`;
+    let htmlSelect = `<option value="">Tipo</option>`;
 
     const dataTypes = [{
         value: 'IN',
@@ -524,15 +522,16 @@ const renderSelectedType = () => {
     }];
 
     dataTypes.forEach(selectType => {
-        html += `<option value="${selectType.value}">${selectType.label}</option>`
+        htmlSelect += `<option value="${selectType.value}">${selectType.label}</option>`
     });
-
-    select.innerHTML = html;
+    
+    select.innerHTML = htmlSelect;
 };
 
-const renderFinancials = (filteredData) => {
-    const financeHeader = document.getElementById('finance-header');
-    financeHeader.innerHTML = '';
+const renderFinancials = filteredData => {
+    const financeIncome = document.querySelector('.income');
+    const financeExpense= document.querySelector('.expense');
+    const financeBalance = document.querySelector('.balance');
 
     const reduceFinancials = filteredData.reduce((previousValue, currentValue) => {
         const financePrice = currentValue.price * currentValue.amount;
@@ -540,17 +539,22 @@ const renderFinancials = (filteredData) => {
         return {
             income_totals: previousValue.income_totals + (currentValue.type === 'IN' ? (financePrice) : 0),
             expense_totals: previousValue.expense_totals + (currentValue.type === 'OUT' ? (financePrice) : 0),
-            balance: previousValue.income_totals + (financePrice)
         };
     }, {
         income_totals: 0,
         expense_totals: 0,
-        balance: 0
     });
 
-    financeHeader.innerHTML += `<span style="color:green">Total de entradas: ${formatPrice(reduceFinancials.income_totals)}</span>`
-    financeHeader.innerHTML += `<span style="color:red">Total de saídas: ${formatPrice(reduceFinancials.expense_totals)}</span>`
-    financeHeader.innerHTML += `<span style="color:blue">Saldo: ${formatPrice(reduceFinancials.balance)}</span>`
+    reduceFinancials.balance = reduceFinancials.income_totals - reduceFinancials.expense_totals;
+
+    financeIncome.innerHTML = `Total de entradas: ${formatPrice(reduceFinancials.income_totals)}`
+    financeExpense.innerHTML = `Total de saídas: ${formatPrice(reduceFinancials.expense_totals)}`
+    financeBalance.innerHTML = `Saldo: ${formatPrice(reduceFinancials.balance)}`
+
+    if (reduceFinancials.balance < 0) {
+        financeBalance.style.color = "red";
+        financeBalance.style.fontWeight = "bold";
+    }
 };
 
 const normalizeValue = value => {
@@ -559,15 +563,16 @@ const normalizeValue = value => {
 
 const filterTable = () => {
     const searchValue = normalizeValue(document.getElementById('search').value);
-    const selectValue = select.value;
+    const selectValue = document.getElementById('select').value;
 
     if (!selectValue && !searchValue) {
-        init();
+        renderTable(data);
+        renderFinancials(data);
         return
     }
 
     const filter = data.filter(element => {
-        const name = normalizeValue(`${element.customer.first_name}` + ` ${element.customer.last_name}`);
+        const name = normalizeValue(`${element.customer.first_name} ${element.customer.last_name}`);
 
         if (selectValue && searchValue) {
             return selectValue === element.type && name.includes(searchValue);
@@ -578,8 +583,8 @@ const filterTable = () => {
         }
     });
 
-    renderTable(filter)
-    renderFinancials(filter)
+    renderTable(filter);
+    renderFinancials(filter);
 };
 
 init();

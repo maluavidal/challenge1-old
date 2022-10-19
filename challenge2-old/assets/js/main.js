@@ -65,7 +65,6 @@ const renderTable = guidesParams => {
         `
     });
 
-
     tbody.innerHTML = html;
 };
 
